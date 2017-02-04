@@ -5,7 +5,7 @@ import copy
 
 import errors
 from cell import Cell, CellType
-from utils import get_sorted_values
+from utils import get_sorted_values, exit_with_error
 
 Sheet = Dict[int, Dict[str, Cell]]
 
@@ -13,8 +13,8 @@ Sheet = Dict[int, Dict[str, Cell]]
 def read_input():
     try:
         row_count, column_count = map(int, input().strip().split(' '))
-    except ValueError as e:
-        raise Exception('Error during reading rows and columns count') from e
+    except ValueError:
+        exit_with_error('Error during reading rows and columns count')
 
     sheet = dict()
     for row_index in range(1, 1 + row_count):
@@ -23,11 +23,11 @@ def read_input():
             for index, cell in enumerate(input().split('\t')):
                 column_letter = chr(ord('A') + index)
                 row[column_letter] = cell
-        except EOFError as e:
-            raise Exception('Too few rows') from e
+        except EOFError:
+            exit_with_error('Error: Too few rows')
         if len(row) != column_count:
-            raise Exception('Columns count in row {} is not equal to {}'
-                            .format(row_index + 1, column_count))
+            exit_with_error(f'Error: Columns count in row {row_index}'
+                            f' is not equal to {column_count}')
         sheet[row_index] = row
     return sheet
 
@@ -42,7 +42,6 @@ def parse(sheet):
     return new_sheet
 
 
-# TODO: separate checking and converting
 def syntax_check(cell):
     if not cell:
         return Cell(CellType.NONE, '')
@@ -59,9 +58,9 @@ def syntax_check(cell):
 
 
 def is_valid_expression(cell):
-    reference_cell = re.compile(
+    reference_cell_re = re.compile(
         r'^=([A-Za-z]\d|\d+)([-+/*]([A-Za-z]\d|\d+))*$')
-    return reference_cell.match(cell)
+    return reference_cell_re.match(cell)
 
 
 def compute_sheet(sheet: Sheet) -> Sheet:
