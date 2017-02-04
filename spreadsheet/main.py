@@ -69,10 +69,8 @@ def compute_sheet(sheet: Sheet) -> Sheet:
         for column_letter, cell in row.items():
             if cell.type == CellType.EXPRESSION:
                 visited = set()
-                new_cell = compute_cell(
+                row[column_letter] = compute_cell(
                     computed_sheet, row_index, column_letter, visited)
-                cell.value = new_cell.value
-                cell.type = new_cell.type
     return computed_sheet
 
 
