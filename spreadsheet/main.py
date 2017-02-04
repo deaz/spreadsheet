@@ -4,6 +4,9 @@ import operator
 from typing import Dict
 import copy
 
+from utils import get_sorted_values
+from errors import *
+
 CellType = Enum('CellType',
                 ['NONE', 'NUMBER', 'EXPRESSION', 'STRING', 'ERROR'])
 
@@ -52,17 +55,17 @@ def parse(sheet):
 # TODO: separate checking and converting
 def syntax_check(cell):
     if not cell:
-        return Cell(CellType.NONE, None)
+        return Cell(CellType.NONE, '')
     elif cell[0] == '\'':
         return Cell(CellType.STRING, cell[1:])
     elif cell[0] == '=':
         if not is_valid_expression(cell):
-            return Cell(CellType.ERROR, '#VALUE!')
+            return Cell(CellType.ERROR, ERR_SYNTAX)
         return Cell(CellType.EXPRESSION, cell[1:])
     elif cell.isdigit():
         return Cell(CellType.NUMBER, int(cell))
     else:
-        return Cell(CellType.ERROR, '#PARSE!')
+        return Cell(CellType.ERROR, ERR_SYNTAX)
 
 
 def is_valid_expression(cell):
@@ -76,17 +79,23 @@ def compute_sheet(sheet: Sheet):
     for row_index, row in sheet.items():
         for column_letter, cell in row.items():
             if cell.type == CellType.EXPRESSION:
-                cell.value = compute_cell(
-                    computed_sheet, row_index, column_letter)
-                cell.type = CellType.NUMBER
+                visited = set()
+                new_cell = compute_cell(
+                    computed_sheet, row_index, column_letter, visited)
+                cell.value = new_cell.value
+                cell.type = new_cell.type
 
 
-def compute_cell(sheet: Sheet, row: int, column: str):
+def compute_cell(sheet: Sheet, row: int, column: str, visited: set) -> Cell:
+    cell_address = column + str(row)
+    if cell_address in visited:
+        return Cell(CellType.ERROR, ERR_CIRCULAR_DEP)
+    visited.add(cell_address)
+
     cell = sheet[row][column]
 
     if cell.type != CellType.EXPRESSION:
-        # TODO: check for error cell
-        return cell.value
+        return cell
 
     term_re = re.compile(r'[A-Za-z]\d|\d+')
     operation_re = re.compile(r'[-+/*]')
@@ -94,24 +103,36 @@ def compute_cell(sheet: Sheet, row: int, column: str):
                        '*': operator.mul, '/': operator.floordiv}
     operands = term_re.findall(cell.value)
     operations = operation_re.findall(cell.value)
-    cell_value = compute_term(operands[0], sheet)
-    for operation, operand in zip(operations, operands[1:]):
-        term_value = compute_term(operand, sheet)
-        cell_value = operation_funcs[operation](cell_value, term_value)
-    return cell_value
+    cell_value = 0
+    # '+' is dummy operation for first operand
+    for operation, operand in zip(['+'] + operations, operands):
+        computed_cell = compute_term(operand, sheet, visited)
+        value = computed_cell.value
+        if computed_cell.type == CellType.ERROR:
+            return computed_cell
+        elif computed_cell.type == CellType.STRING:
+            return Cell(CellType.ERROR, ERR_WRONG_ARG)
+        elif computed_cell.type == CellType.NONE:
+            value = 0
+        try:
+            cell_value = operation_funcs[operation](cell_value, value)
+        except ZeroDivisionError:
+            return Cell(CellType.ERROR, ERR_ZERO_DIV)
+    return Cell(CellType.NUMBER, cell_value)
 
 
-def compute_term(term: str, sheet: Sheet):
+def compute_term(term: str, sheet: Sheet, visited: set) -> Cell:
     if term.isdigit():
-        return int(term)
+        return Cell(CellType.NUMBER, int(term))
     else:
-        return compute_cell(sheet, int(term[1]), term[0].upper())
+        return compute_cell(sheet, int(term[1]), term[0].upper(), visited)
 
 
-def format_sheet(sheet: Sheet):
+def format_sheet(sheet: Sheet) -> str:
     result = ''
-    for row in sheet.values():
-        sorted_values = list(zip(*sorted(row.items())))[1]
+    sorted_rows = get_sorted_values(sheet)
+    for row in sorted_rows:
+        sorted_values = get_sorted_values(row)
         result += '\t'.join(map(lambda cell: str(cell.value), sorted_values))
         result += '\n'
     return result
