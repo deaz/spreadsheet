@@ -1,21 +1,11 @@
-import re
-from enum import Enum
 import operator
+import re
 from typing import Dict
 import copy
 
-from utils import get_sorted_values
 import errors
-
-CellType = Enum('CellType',
-                ['NONE', 'NUMBER', 'EXPRESSION', 'STRING', 'ERROR'])
-
-
-class Cell:
-    def __init__(self, cell_type: CellType, cell_value):
-        self.type = cell_type
-        self.value = cell_value
-
+from cell import Cell, CellType
+from utils import get_sorted_values
 
 Sheet = Dict[int, Dict[str, Cell]]
 
@@ -74,9 +64,9 @@ def is_valid_expression(cell):
     return reference_cell.match(cell)
 
 
-def compute_sheet(sheet: Sheet):
+def compute_sheet(sheet: Sheet) -> Sheet:
     computed_sheet = copy.deepcopy(sheet)
-    for row_index, row in sheet.items():
+    for row_index, row in computed_sheet.items():
         for column_letter, cell in row.items():
             if cell.type == CellType.EXPRESSION:
                 visited = set()
@@ -84,6 +74,7 @@ def compute_sheet(sheet: Sheet):
                     computed_sheet, row_index, column_letter, visited)
                 cell.value = new_cell.value
                 cell.type = new_cell.type
+    return computed_sheet
 
 
 def compute_cell(sheet: Sheet, row: int, column: str, visited: set) -> Cell:
@@ -139,10 +130,10 @@ def format_sheet(sheet: Sheet) -> str:
 
 
 def main():
-    sheet = read_input()
-    sheet = parse(sheet)
-    compute_sheet(sheet)
-    print(format_sheet(sheet))
+    raw_sheet = read_input()
+    sheet = parse(raw_sheet)
+    computed_sheet = compute_sheet(sheet)
+    print(format_sheet(computed_sheet))
 
 
 if __name__ == '__main__':
