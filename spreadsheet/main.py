@@ -5,7 +5,7 @@ from typing import Dict
 import copy
 
 from utils import get_sorted_values
-from errors import *
+import errors
 
 CellType = Enum('CellType',
                 ['NONE', 'NUMBER', 'EXPRESSION', 'STRING', 'ERROR'])
@@ -60,12 +60,12 @@ def syntax_check(cell):
         return Cell(CellType.STRING, cell[1:])
     elif cell[0] == '=':
         if not is_valid_expression(cell):
-            return Cell(CellType.ERROR, ERR_SYNTAX)
+            return Cell(CellType.ERROR, errors.INVALID_SYNTAX)
         return Cell(CellType.EXPRESSION, cell[1:])
     elif cell.isdigit():
         return Cell(CellType.NUMBER, int(cell))
     else:
-        return Cell(CellType.ERROR, ERR_SYNTAX)
+        return Cell(CellType.ERROR, errors.INVALID_SYNTAX)
 
 
 def is_valid_expression(cell):
@@ -89,7 +89,7 @@ def compute_sheet(sheet: Sheet):
 def compute_cell(sheet: Sheet, row: int, column: str, visited: set) -> Cell:
     cell_address = column + str(row)
     if cell_address in visited:
-        return Cell(CellType.ERROR, ERR_CIRCULAR_DEP)
+        return Cell(CellType.ERROR, errors.CIRCULAR_DEP)
     visited.add(cell_address)
 
     cell = sheet[row][column]
@@ -111,13 +111,13 @@ def compute_cell(sheet: Sheet, row: int, column: str, visited: set) -> Cell:
         if computed_cell.type == CellType.ERROR:
             return computed_cell
         elif computed_cell.type == CellType.STRING:
-            return Cell(CellType.ERROR, ERR_WRONG_ARG)
+            return Cell(CellType.ERROR, errors.WRONG_ARG)
         elif computed_cell.type == CellType.NONE:
             value = 0
         try:
             cell_value = operation_funcs[operation](cell_value, value)
         except ZeroDivisionError:
-            return Cell(CellType.ERROR, ERR_ZERO_DIV)
+            return Cell(CellType.ERROR, errors.ZERO_DIV)
     return Cell(CellType.NUMBER, cell_value)
 
 
