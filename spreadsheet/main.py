@@ -1,16 +1,17 @@
 import operator
 import re
-from typing import Dict
+from typing import Dict, TypeVar
 import copy
 
 import errors
 from cell import Cell, CellType
 from utils import get_sorted_values, exit_with_error
 
-Sheet = Dict[int, Dict[str, Cell]]
+T = TypeVar('T', str, Cell)
+Sheet = Dict[int, Dict[str, T]]
 
 
-def read_input():
+def read_input() -> Sheet:
     try:
         row_count, column_count = map(int, input().strip().split(' '))
     except ValueError:
@@ -32,7 +33,7 @@ def read_input():
     return sheet
 
 
-def parse(sheet):
+def parse(sheet: Sheet) -> Sheet:
     new_sheet = dict()
     for row_index, row in sheet.items():
         new_row = dict()
@@ -42,7 +43,7 @@ def parse(sheet):
     return new_sheet
 
 
-def syntax_check(cell):
+def syntax_check(cell: str) -> Cell:
     if not cell:
         return Cell(CellType.NONE, '')
     elif cell[0] == '\'':
@@ -57,10 +58,10 @@ def syntax_check(cell):
         return Cell(CellType.ERROR, errors.INVALID_SYNTAX)
 
 
-def is_valid_expression(cell):
+def is_valid_expression(cell: str) -> bool:
     reference_cell_re = re.compile(
         r'^=([A-Za-z]\d|\d+)([-+/*]([A-Za-z]\d|\d+))*$')
-    return reference_cell_re.match(cell)
+    return bool(reference_cell_re.match(cell))
 
 
 def compute_sheet(sheet: Sheet) -> Sheet:
@@ -126,7 +127,7 @@ def format_sheet(sheet: Sheet) -> str:
     return result
 
 
-def main():
+def main() -> None:
     raw_sheet = read_input()
     sheet = parse(raw_sheet)
     computed_sheet = compute_sheet(sheet)
