@@ -17,7 +17,7 @@ def read_dimensions() -> Tuple[int, int]:
         exit_with_error('Error during reading rows and columns count')
     if row_count <= 0 or column_count <= 0:
         exit_with_error('Row and column counts must be positive integers')
-    return row_count, row_count
+    return row_count, column_count
 
 
 def read_input(row_count, column_count) -> Sheet:
