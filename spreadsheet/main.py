@@ -16,6 +16,8 @@ def read_input() -> Sheet:
         row_count, column_count = map(int, input().strip().split(' '))
     except ValueError:
         exit_with_error('Error during reading rows and columns count')
+    if row_count <= 0 or column_count <= 0:
+        exit_with_error('Row and column counts must be positive integers')
 
     sheet = dict()
     for row_index in range(1, 1 + row_count):
