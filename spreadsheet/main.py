@@ -32,7 +32,8 @@ def read_input(row_count, column_count) -> Sheet:
             exit_with_error('Error: Too few rows')
         if len(row) != column_count:
             exit_with_error(f'Error: Columns count in row {row_index}'
-                            f' is not equal to {column_count}')
+                            f' is {len(row)}'
+                            f' (must be equal to {column_count})')
         sheet[row_index] = row
     return sheet
 
