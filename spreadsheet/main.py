@@ -1,31 +1,33 @@
 import operator
 import re
-from typing import Dict, TypeVar
+from typing import Dict, Tuple
 import copy
 
 import errors
 from cell import Cell, CellType
 from utils import get_sorted_values, exit_with_error
 
-T = TypeVar('T', str, Cell)
-Sheet = Dict[int, Dict[str, T]]
+Sheet = Dict[int, Dict[str, Cell]]
 
 
-def read_input() -> Sheet:
+def read_dimensions() -> Tuple[int, int]:
     try:
         row_count, column_count = map(int, input().strip().split(' '))
     except ValueError:
         exit_with_error('Error during reading rows and columns count')
     if row_count <= 0 or column_count <= 0:
         exit_with_error('Row and column counts must be positive integers')
+    return row_count, row_count
 
+
+def read_input(row_count, column_count) -> Sheet:
     sheet = dict()
     for row_index in range(1, 1 + row_count):
+        row = dict()
         try:
-            row = dict()
             for index, cell in enumerate(input().split('\t')):
                 column_letter = chr(ord('A') + index)
-                row[column_letter] = cell
+                row[column_letter] = parse_cell(cell)
         except EOFError:
             exit_with_error('Error: Too few rows')
         if len(row) != column_count:
@@ -35,17 +37,7 @@ def read_input() -> Sheet:
     return sheet
 
 
-def parse(sheet: Sheet) -> Sheet:
-    new_sheet = dict()
-    for row_index, row in sheet.items():
-        new_row = dict()
-        for column_letter, cell in row.items():
-            new_row[column_letter] = syntax_check(cell)
-        new_sheet[row_index] = new_row
-    return new_sheet
-
-
-def syntax_check(cell: str) -> Cell:
+def parse_cell(cell: str) -> Cell:
     if not cell:
         return Cell(CellType.NONE, '')
     elif cell[0] == '\'':
@@ -66,7 +58,7 @@ def is_valid_expression(cell: str) -> bool:
     return bool(reference_cell_re.match(cell))
 
 
-def compute_sheet(sheet: Sheet) -> Sheet:
+def eval_sheet(sheet: Sheet) -> Sheet:
     computed_sheet = copy.deepcopy(sheet)
     for row_index, row in computed_sheet.items():
         for column_letter, cell in row.items():
@@ -83,7 +75,10 @@ def compute_cell(sheet: Sheet, row: int, column: str, visited: set) -> Cell:
         return Cell(CellType.ERROR, errors.CIRCULAR_DEP)
     visited.add(cell_address)
 
-    cell = sheet[row][column]
+    try:
+        cell = sheet[row][column]
+    except KeyError:
+        return Cell(CellType.ERROR, errors.NONEXISTENT_CELL)
 
     if cell.type != CellType.EXPRESSION:
         return cell
@@ -130,9 +125,9 @@ def format_sheet(sheet: Sheet) -> str:
 
 
 def main() -> None:
-    raw_sheet = read_input()
-    sheet = parse(raw_sheet)
-    computed_sheet = compute_sheet(sheet)
+    row_count, column_count = read_dimensions()
+    sheet = read_input(row_count, column_count)
+    computed_sheet = eval_sheet(sheet)
     print(format_sheet(computed_sheet))
 
 
