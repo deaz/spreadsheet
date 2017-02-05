@@ -8,6 +8,8 @@ Command line application for calculating simple Excel-like spreadsheets.
 
 ## How to run
 
+Assuming your current directory is project directory:
+
 `./bin/spreadsheet`
 
 ## Error Messages
