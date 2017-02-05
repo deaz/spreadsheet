@@ -3,9 +3,9 @@ import re
 from typing import Dict, Tuple
 import copy
 
-import errors
-from cell import Cell, CellType
-from utils import get_sorted_values, exit_with_error
+import spreadsheet.errors as errors
+from spreadsheet.cell import Cell, CellType
+from spreadsheet.utils import get_sorted_values, exit_with_error
 
 Sheet = Dict[int, Dict[str, Cell]]
 

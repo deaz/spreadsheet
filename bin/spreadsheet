@@ -1,4 +1,5 @@
 #!/bin/bash
 
 BINPATH=`dirname $0`
-python "$BINPATH/../spreadsheet/main.py"
+cd "$BINPATH/.."
+python -m spreadsheet.main
