@@ -20,6 +20,8 @@ class ParseCellTest(unittest.TestCase):
     def test_expression_cell(self):
         self.assertEqual(parse_cell('=1+2+b1'),
                          Cell(CellType.EXPRESSION, '1+2+b1'))
+        self.assertEqual(parse_cell('=100+2+b1'),
+                         Cell(CellType.EXPRESSION, '100+2+b1'))
         self.assertEqual(parse_cell('=1'),
                          Cell(CellType.EXPRESSION, '1'))
         self.assertEqual(parse_cell('=b1'),

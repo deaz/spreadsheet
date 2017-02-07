@@ -16,7 +16,7 @@ def exit_with_error(message: str) -> None:
 
 def get_operations_and_operands(cell: Cell) -> Tuple[List[str], List[str]]:
     operation_re = re.compile(r'[-+/*]')
-    operand_re = re.compile(r'[A-Za-z]\d|\d+')
+    operand_re = re.compile(r'[A-Za-z][1-9]|\d+')
     operations = operation_re.findall(cell.value)
     operands = operand_re.findall(cell.value)
     return operations, operands

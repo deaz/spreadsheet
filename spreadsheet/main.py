@@ -64,7 +64,7 @@ def parse_cell(cell: str) -> Cell:
 def is_valid_expression(cell: str) -> bool:
     """Check if cell string represents valid expression or not"""
     reference_cell_re = re.compile(
-        r'^=([A-Za-z]\d|\d+)([-+/*]([A-Za-z]\d|\d+))*$')
+        r'^=([A-Za-z][1-9]|\d+)([-+/*]([A-Za-z][1-9]|\d+))*$')
     return bool(reference_cell_re.match(cell))
 
 
