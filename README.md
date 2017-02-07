@@ -20,3 +20,7 @@ Assuming your current directory is project directory:
 - `#REF!` - circular dependency in cell expression
 - `#DIV/0!` - division by zero
 - `#NONEXIST!` - referenced cell is not exists in current spreadsheet
+
+## Notes
+
+- Empty cells treated as zeros in expressions
