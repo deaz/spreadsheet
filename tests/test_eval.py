@@ -39,6 +39,16 @@ class EvalCellTest(unittest.TestCase):
         self.assertEqual(eval_cell(sheet, 1, 'A', set()),
                          Cell(CellType.ERROR, errors.ZERO_DIV))
 
+        sheet = {1: {'A': Cell(CellType.EXPRESSION, 'b1'),
+                     'B': Cell(CellType.STRING, '123')}}
+        self.assertEqual(eval_cell(sheet, 1, 'A', set()),
+                         Cell(CellType.STRING, '123'))
+
+        sheet = {1: {'A': Cell(CellType.EXPRESSION, 'b1+2'),
+                     'B': Cell(CellType.STRING, '\'123')}}
+        self.assertEqual(eval_cell(sheet, 1, 'A', set()),
+                         Cell(CellType.ERROR, errors.WRONG_ARG))
+
 
 class EvalSheetTest(unittest.TestCase):
     def test(self):

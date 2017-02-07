@@ -102,6 +102,10 @@ def eval_cell(sheet: Sheet, row: int, column: str, visited: set) -> Cell:
         return cell
 
     operations, operands = get_operations_and_operands(cell)
+    if len(operands) == 1:
+        # No need to check single term in expression
+        return eval_term(operands[0], sheet, visited)
+
     cell_value = 0
     # '+' is dummy operation for first operand
     for operation, operand in zip(['+'] + operations, operands):
