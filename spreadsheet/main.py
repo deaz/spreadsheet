@@ -110,18 +110,16 @@ def eval_cell(sheet: Sheet, row: int, column: str, visited: set) -> Cell:
     # '+' is dummy operation for first operand
     for operation, operand in zip(['+'] + operations, operands):
         evaluated_cell = eval_term(operand, sheet, visited)
-        value = evaluated_cell.value
         if evaluated_cell.type == CellType.ERROR:
             # Set error message for cell
             # if one of referenced cells contains error
             return evaluated_cell
-        elif evaluated_cell.type == CellType.STRING:
+        elif (evaluated_cell.type == CellType.STRING
+              or evaluated_cell.type == CellType.NONE):
             return Cell(CellType.ERROR, errors.WRONG_ARG)
-        elif evaluated_cell.type == CellType.NONE:
-            # Use empty cell as 0 for expressions
-            value = 0
         try:
-            cell_value = OPERATION_FUNCS[operation](cell_value, value)
+            cell_value = OPERATION_FUNCS[operation](cell_value,
+                                                    evaluated_cell.value)
         except ZeroDivisionError:
             return Cell(CellType.ERROR, errors.ZERO_DIV)
     return Cell(CellType.NUMBER, cell_value)
