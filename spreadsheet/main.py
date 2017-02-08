@@ -27,8 +27,8 @@ def read_dimensions() -> Tuple[int, int]:
 def read_input(row_count, column_count) -> Sheet:
     """Read sheet"""
     sheet = dict()
-    # Rows counted from 1
-    for row_index in range(1, 1 + row_count):
+    # Rows counted from 0
+    for row_index in range(row_count):
         row = dict()
         try:
             # Columns counted from 'A' letter
@@ -64,7 +64,7 @@ def parse_cell(cell: str) -> Cell:
 def is_valid_expression(cell: str) -> bool:
     """Check if cell string represents valid expression or not"""
     reference_cell_re = re.compile(
-        r'^=([A-Za-z][1-9]|\d+)([-+/*]([A-Za-z][1-9]|\d+))*$')
+        r'^=([A-Za-z]\d|\d+)([-+/*]([A-Za-z]\d|\d+))*$')
     return bool(reference_cell_re.match(cell))
 
 
