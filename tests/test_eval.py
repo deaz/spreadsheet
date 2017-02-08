@@ -33,7 +33,7 @@ class EvalCellTest(unittest.TestCase):
         sheet = {1: {'A': Cell(CellType.EXPRESSION, '10+2/3*4+b1'),
                      'B': Cell(CellType.NONE, '')}}
         self.assertEqual(eval_cell(sheet, 1, 'A', set()),
-                         Cell(CellType.NUMBER, 16))
+                         Cell(CellType.ERROR, errors.WRONG_ARG))
 
         sheet = {1: {'A': Cell(CellType.EXPRESSION, '2/0')}}
         self.assertEqual(eval_cell(sheet, 1, 'A', set()),
