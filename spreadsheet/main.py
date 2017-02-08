@@ -16,7 +16,7 @@ Sheet = Dict[int, Dict[str, Cell]]
 def read_dimensions() -> Tuple[int, int]:
     """Read dimensions of input sheet"""
     try:
-        row_count, column_count = map(int, input().strip().split(' '))
+        row_count, column_count = map(int, input().strip().split('\t'))
     except ValueError:
         exit_with_error('Error during reading rows and columns count')
     if row_count <= 0 or column_count <= 0:
